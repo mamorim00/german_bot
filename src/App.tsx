@@ -4,7 +4,8 @@ import Character from './components/Character';
 import VoiceRecorder from './components/VoiceRecorder';
 import ConversationView from './components/ConversationView';
 import FeedbackPanel from './components/FeedbackPanel';
-import { Theme, Message, Correction, CharacterMood } from './types/index';
+import TipsPanel from './components/TipsPanel';
+import { Theme, Message, Correction, CharacterMood, Tip } from './types/index';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
   const [characterMood, setCharacterMood] = useState<CharacterMood>('happy');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [tips, setTips] = useState<Tip[]>([]);
+  const [positiveReinforcement, setPositiveReinforcement] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const conversationHistoryRef = useRef<Array<{ role: string; content: string }>>([]);
 
@@ -52,6 +55,8 @@ function App() {
     setSelectedTheme(theme);
     setMessages([]);
     setCorrections([]);
+    setTips([]);
+    setPositiveReinforcement('');
     conversationHistoryRef.current = [];
     setCharacterMood('happy');
   };
@@ -82,9 +87,11 @@ function App() {
 
       const data = await response.json();
 
-      // Update corrections
+      // Update corrections and feedback
       setCorrections(data.corrections || []);
       setHasErrors(data.hasErrors || false);
+      setTips(data.tips || []);
+      setPositiveReinforcement(data.positiveReinforcement || '');
 
       // Set character mood based on errors
       if (!data.hasErrors) {
@@ -152,6 +159,8 @@ function App() {
     setSelectedTheme(null);
     setMessages([]);
     setCorrections([]);
+    setTips([]);
+    setPositiveReinforcement('');
     setCharacterMood('happy');
     conversationHistoryRef.current = [];
     if (audioRef.current) {
@@ -196,7 +205,11 @@ function App() {
         {/* Left Column - Character & Controls */}
         <div className="lg:col-span-1 space-y-6">
           <div className="card">
-            <Character mood={characterMood} isSpeaking={isSpeaking} />
+            <Character
+              mood={characterMood}
+              isSpeaking={isSpeaking}
+              persona={selectedTheme.character}
+            />
           </div>
 
           <div className="card">
@@ -217,6 +230,9 @@ function App() {
               </p>
             </div>
           )}
+
+          {/* Tips Panel */}
+          <TipsPanel tips={tips} commonPhrases={selectedTheme.commonPhrases} />
         </div>
 
         {/* Right Column - Conversation & Feedback */}
@@ -225,8 +241,12 @@ function App() {
             <ConversationView messages={messages} onPlayAudio={playAudio} />
           </div>
 
-          {corrections.length > 0 && (
-            <FeedbackPanel corrections={corrections} hasErrors={hasErrors} />
+          {(corrections.length > 0 || positiveReinforcement) && (
+            <FeedbackPanel
+              corrections={corrections}
+              hasErrors={hasErrors}
+              positiveReinforcement={positiveReinforcement}
+            />
           )}
         </div>
       </div>

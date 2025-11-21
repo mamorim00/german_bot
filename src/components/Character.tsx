@@ -1,12 +1,13 @@
-import { CharacterMood } from '../types/index';
+import { CharacterMood, CharacterPersona } from '../types/index';
 import { Smile, Sparkles, ThumbsUp, Lightbulb } from 'lucide-react';
 
 interface CharacterProps {
   mood: CharacterMood;
   isSpeaking?: boolean;
+  persona?: CharacterPersona;
 }
 
-export default function Character({ mood, isSpeaking }: CharacterProps) {
+export default function Character({ mood, isSpeaking, persona }: CharacterProps) {
   const getMoodEmoji = () => {
     switch (mood) {
       case 'happy':
@@ -37,6 +38,20 @@ export default function Character({ mood, isSpeaking }: CharacterProps) {
     }
   };
 
+  const getMoodMessage = () => {
+    if (!persona) return '';
+    switch (mood) {
+      case 'celebrating':
+        return persona.catchphrases[Math.floor(Math.random() * persona.catchphrases.length)];
+      case 'encouraging':
+        return 'Kein Problem! Übung macht den Meister!';
+      case 'thinking':
+        return 'Hmm, lass mich nachdenken...';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -44,7 +59,11 @@ export default function Character({ mood, isSpeaking }: CharacterProps) {
           isSpeaking ? 'animate-pulse' : 'animate-bounce-soft'
         } transition-all duration-300`}
       >
-        {getMoodEmoji()}
+        {persona ? (
+          <span className="text-6xl">{persona.avatar}</span>
+        ) : (
+          getMoodEmoji()
+        )}
 
         {/* Decorative circles */}
         <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full opacity-80"></div>
@@ -53,12 +72,32 @@ export default function Character({ mood, isSpeaking }: CharacterProps) {
 
       <div className="mt-4 text-center">
         <h2 className="text-2xl font-display font-bold text-gray-800">
-          Hallo! 👋
+          {persona ? persona.name : 'Hallo!'} 👋
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Ich bin dein Sprachlehrer
+          {persona ? persona.occupation : 'Ich bin dein Sprachlehrer'}
         </p>
+        {persona && (
+          <div className="mt-2 flex flex-wrap gap-1 justify-center">
+            {persona.personality.slice(0, 3).map((trait) => (
+              <span
+                key={trait}
+                className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
+              >
+                {trait}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
+
+      {getMoodMessage() && mood !== 'happy' && (
+        <div className="mt-3 max-w-xs text-center">
+          <p className="text-sm italic text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+            "{getMoodMessage()}"
+          </p>
+        </div>
+      )}
 
       {isSpeaking && (
         <div className="mt-3 flex gap-1">
