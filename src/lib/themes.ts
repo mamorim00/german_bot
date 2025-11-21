@@ -1,0 +1,68 @@
+import { Theme } from '../types/index';
+
+export const themes: Theme[] = [
+  {
+    id: 'coffee-shop',
+    name: 'Kaffeehaus',
+    description: 'Order coffee and pastries at a cozy café',
+    icon: '☕',
+    color: 'bg-amber-500',
+    prompt: 'You are at a German coffee shop. Help the student practice ordering drinks and snacks, asking for the bill, and making small talk with the barista.',
+  },
+  {
+    id: 'restaurant',
+    name: 'Restaurant',
+    description: 'Make reservations and order delicious meals',
+    icon: '🍽️',
+    color: 'bg-red-500',
+    prompt: 'You are at a German restaurant. Help the student practice making reservations, ordering food, asking about ingredients, and interacting with the waiter.',
+  },
+  {
+    id: 'grocery-store',
+    name: 'Supermarkt',
+    description: 'Shop for groceries and household items',
+    icon: '🛒',
+    color: 'bg-green-500',
+    prompt: 'You are at a German supermarket. Help the student practice asking where items are located, asking about prices, and making purchases.',
+  },
+  {
+    id: 'train-station',
+    name: 'Bahnhof',
+    description: 'Buy tickets and navigate public transport',
+    icon: '🚂',
+    color: 'bg-blue-500',
+    prompt: 'You are at a German train station. Help the student practice buying tickets, asking about schedules, platforms, and directions.',
+  },
+  {
+    id: 'hotel',
+    name: 'Hotel',
+    description: 'Check in and handle hotel services',
+    icon: '🏨',
+    color: 'bg-purple-500',
+    prompt: 'You are at a German hotel reception. Help the student practice checking in/out, asking about amenities, reporting problems, and making requests.',
+  },
+  {
+    id: 'doctor',
+    name: 'Arztpraxis',
+    description: 'Describe symptoms and get medical advice',
+    icon: '🏥',
+    color: 'bg-pink-500',
+    prompt: 'You are at a German doctor\'s office. Help the student practice describing symptoms, making appointments, and understanding medical advice.',
+  },
+  {
+    id: 'workplace',
+    name: 'Arbeitsplatz',
+    description: 'Professional conversations at work',
+    icon: '💼',
+    color: 'bg-indigo-500',
+    prompt: 'You are at a German workplace. Help the student practice professional conversations, emails, meetings, and workplace interactions.',
+  },
+  {
+    id: 'social',
+    name: 'Freunde treffen',
+    description: 'Casual conversations with friends',
+    icon: '🎉',
+    color: 'bg-yellow-500',
+    prompt: 'You are meeting German friends for a social gathering. Help the student practice casual conversation, making plans, sharing experiences, and expressing opinions.',
+  },
+];
