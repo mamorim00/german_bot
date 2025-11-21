@@ -56,21 +56,29 @@ export function LearningProvider({ children }: { children: ReactNode }) {
   const [homework, setHomework] = useState<HomeworkAssignment[]>([]);
   const [homeworkSubmissions, setHomeworkSubmissions] = useState<UserHomeworkSubmission[]>([]);
   const [grammarMastery, setGrammarMastery] = useState<GrammarMastery[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isAuthenticated && user) {
       refreshLearningData();
     } else {
-      // Reset state
+      // For non-authenticated users, still show local lessons
+      const localLessons = gamifiedLessons.map((lesson) => ({
+        ...lesson,
+        id: `lesson-${lesson.level}-${lesson.lesson_number}`,
+        created_at: new Date().toISOString(),
+      })) as any[];
+      setLessons(localLessons);
+
+      // Reset other state
       setUserLevel('A1');
       setAvgAccuracy(0);
       setVocabularySize(0);
-      setLessons([]);
       setUserLessonProgress([]);
       setHomework([]);
       setHomeworkSubmissions([]);
       setGrammarMastery([]);
+      setLoading(false); // Set loading to false after setting lessons
     }
   }, [isAuthenticated, user]);
 
@@ -155,6 +163,13 @@ export function LearningProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error loading learning data:', error);
+      // Ensure lessons are available even if there's an error
+      const localLessons = gamifiedLessons.map((lesson) => ({
+        ...lesson,
+        id: `lesson-${lesson.level}-${lesson.lesson_number}`,
+        created_at: new Date().toISOString(),
+      })) as any[];
+      setLessons(localLessons);
     } finally {
       setLoading(false);
     }
