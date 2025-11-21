@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, PlayCircle, CheckCircle } from 'lucide-react';
+import { speakGerman } from '../../utils/germanSpeech';
 
 interface KeyPhrase {
   german: string;
@@ -30,15 +31,12 @@ export const ScenarioIntro: React.FC<ScenarioIntroProps> = ({
   const [showTranslations, setShowTranslations] = useState(true);
   const [completedPhrases, setCompletedPhrases] = useState<Set<number>>(new Set());
 
-  const speakText = (text: string, index: number) => {
-    if ('speechSynthesis' in window) {
-      setPlayingAudio(index);
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.8;
-      utterance.onend = () => setPlayingAudio(null);
-      window.speechSynthesis.speak(utterance);
-    }
+  const speakText = async (text: string, index: number) => {
+    setPlayingAudio(index);
+    await speakGerman(text, {
+      rate: 0.8,
+      onEnd: () => setPlayingAudio(null),
+    });
   };
 
   const togglePhraseCompletion = (index: number) => {

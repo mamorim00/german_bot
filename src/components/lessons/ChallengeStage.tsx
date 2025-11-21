@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Volume2, Zap, Trophy } from 'lucide-react';
 import { useLearning } from '../../contexts/LearningContext';
+import { speakGerman } from '../../utils/germanSpeech';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -38,13 +39,10 @@ export const ChallengeStage: React.FC<ChallengeStageProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const speakText = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    }
+  const speakText = async (text: string) => {
+    await speakGerman(text, {
+      rate: 0.85,
+    });
   };
 
   const startChallenge = () => {
