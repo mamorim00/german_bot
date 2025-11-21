@@ -9,6 +9,44 @@ export const gamifiedLessons = [
     title: '👋 First Words Quest',
     description: 'Your German adventure begins! Master basic greetings and unlock the Social Butterfly badge.',
     theme_id: 'social',
+    scenario_context: "You've just arrived in Berlin and you're meeting your new roommate for the first time! You're standing outside your apartment building, and someone friendly approaches you with a smile. Time to make a great first impression with your German greetings!",
+    key_phrases: [
+      { german: 'Hallo', english: 'Hello', pronunciation: 'HAH-loh' },
+      { german: 'Wie heißt du?', english: "What's your name? (informal)", pronunciation: 'vee HEIST doo' },
+      { german: 'Ich heiße...', english: 'My name is...', pronunciation: 'ikh HY-suh' },
+      { german: 'Freut mich', english: 'Nice to meet you', pronunciation: 'FROYT mikh' },
+      { german: 'Tschüss', english: 'Bye', pronunciation: 'CHOOS' }
+    ],
+    example_dialogue: [
+      { speaker: 'AI', german: 'Hallo! Wie heißt du?', english: 'Hello! What\'s your name?' },
+      { speaker: 'You', german: 'Hallo! Ich heiße Anna.', english: 'Hello! My name is Anna.' },
+      { speaker: 'AI', german: 'Freut mich, Anna! Ich heiße Max.', english: 'Nice to meet you, Anna! My name is Max.' },
+      { speaker: 'You', german: 'Freut mich auch!', english: 'Nice to meet you too!' }
+    ],
+    conversation_scripts: [
+      {
+        id: 1,
+        aiMessage: 'Hallo! Ich bin dein Sprachpartner. Wie heißt du?',
+        prompt: 'Greet me and tell me your name',
+        hints: ['Use "Hallo" to greet', 'Use "Ich heiße..." to say your name'],
+        expectedPhrases: ['hallo', 'ich heiße']
+      },
+      {
+        id: 2,
+        aiMessage: 'Sehr gut! Und woher kommst du?',
+        prompt: 'Tell me where you\'re from (use: Ich komme aus...)',
+        hints: ['Say your country in German', 'Use "Ich komme aus..."'],
+        expectedPhrases: ['ich komme', 'aus']
+      },
+      {
+        id: 3,
+        aiMessage: 'Wunderbar! Jetzt sag auf Wiedersehen.',
+        prompt: 'Say goodbye in a friendly way',
+        hints: ['You can use "Tschüss" or "Auf Wiedersehen"'],
+        expectedPhrases: ['tschüss', 'auf wiedersehen', 'bye']
+      }
+    ],
+    challenge_scenario: 'Überraschung! Your new friend just said "Bis bald!" instead of goodbye. How do you respond naturally? (Hint: "Bis bald" means "See you soon!")',
     objectives: [
       '✨ Say hello and goodbye like a native',
       '🎯 Introduce yourself with confidence',
@@ -71,6 +109,45 @@ export const gamifiedLessons = [
     title: '☕ Coffee Shop Champion',
     description: 'Order like a local! Master café vocabulary and earn the Barista\'s Friend badge.',
     theme_id: 'coffee-shop',
+    scenario_context: "It's a beautiful morning in Berlin and you're at a cozy café near Alexanderplatz. The smell of fresh coffee and pastries fills the air. You're hungry, you need caffeine, and it's time to order your first German breakfast!",
+    key_phrases: [
+      { german: 'Ich möchte...', english: 'I would like...', pronunciation: 'ikh MERK-tuh' },
+      { german: 'einen Kaffee', english: 'a coffee', pronunciation: 'I-nen KAH-fay' },
+      { german: 'Wie viel kostet das?', english: 'How much does that cost?', pronunciation: 'vee feel KOS-tet dahs' },
+      { german: 'Mit Milch, bitte', english: 'With milk, please', pronunciation: 'mit milkh, BIT-tuh' },
+      { german: 'Die Rechnung, bitte', english: 'The bill, please', pronunciation: 'dee REKH-noong BIT-tuh' }
+    ],
+    example_dialogue: [
+      { speaker: 'Barista', german: 'Guten Morgen! Was möchten Sie?', english: 'Good morning! What would you like?' },
+      { speaker: 'You', german: 'Ich möchte einen Cappuccino, bitte.', english: 'I would like a cappuccino, please.' },
+      { speaker: 'Barista', german: 'Mit Milch oder ohne Milch?', english: 'With milk or without milk?' },
+      { speaker: 'You', german: 'Mit Milch, bitte. Und ein Croissant.', english: 'With milk, please. And a croissant.' },
+      { speaker: 'Barista', german: 'Sehr gern! Das macht 5 Euro 50.', english: 'With pleasure! That\'s 5 euros 50.' }
+    ],
+    conversation_scripts: [
+      {
+        id: 1,
+        aiMessage: 'Guten Morgen! Willkommen im Café. Was möchten Sie heute?',
+        prompt: 'Order a coffee or tea (use: Ich möchte...)',
+        hints: ['Use "Ich möchte einen Kaffee" or "Ich möchte einen Tee"', 'Don\'t forget "bitte"!'],
+        expectedPhrases: ['ich möchte', 'kaffee', 'tee']
+      },
+      {
+        id: 2,
+        aiMessage: 'Sehr gut! Möchten Sie auch etwas zu essen?',
+        prompt: 'Order a pastry (Croissant, Brötchen, or Kuchen)',
+        hints: ['Try "Und ein Croissant, bitte"', 'Use "und" to add to your order'],
+        expectedPhrases: ['croissant', 'brötchen', 'kuchen']
+      },
+      {
+        id: 3,
+        aiMessage: 'Perfekt! Möchten Sie Ihren Kaffee mit Milch und Zucker?',
+        prompt: 'Say how you want your coffee (mit Milch, ohne Zucker, etc.)',
+        hints: ['mit = with, ohne = without', '"Ja, bitte" or "Nein, danke" also work!'],
+        expectedPhrases: ['mit', 'ohne', 'ja', 'nein']
+      }
+    ],
+    challenge_scenario: 'Plot twist! The barista just asked "Zum Mitnehmen oder hier trinken?" (To go or drink here?). How do you respond? Try saying "Hier trinken" (drink here) or "Zum Mitnehmen" (to go)!',
     objectives: [
       '☕ Order coffee and pastries with confidence',
       '💰 Ask about prices like a pro',

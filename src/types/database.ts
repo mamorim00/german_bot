@@ -207,6 +207,12 @@ export interface Database {
           difficulty_score: number
           prerequisites: Json
           created_at: string
+          // New conversation-first fields
+          scenario_context?: string
+          key_phrases?: Json
+          example_dialogue?: Json
+          conversation_scripts?: Json
+          challenge_scenario?: Json
         }
         Insert: {
           id?: string
@@ -224,6 +230,11 @@ export interface Database {
           difficulty_score?: number
           prerequisites?: Json
           created_at?: string
+          scenario_context?: string
+          key_phrases?: Json
+          example_dialogue?: Json
+          conversation_scripts?: Json
+          challenge_scenario?: Json
         }
         Update: {
           id?: string
@@ -241,6 +252,11 @@ export interface Database {
           difficulty_score?: number
           prerequisites?: Json
           created_at?: string
+          scenario_context?: string
+          key_phrases?: Json
+          example_dialogue?: Json
+          conversation_scripts?: Json
+          challenge_scenario?: Json
         }
       }
       user_lesson_progress: {
@@ -256,6 +272,8 @@ export interface Database {
           started_at: string | null
           completed_at: string | null
           last_accessed: string
+          current_stage?: number
+          completed_stages?: Json
         }
         Insert: {
           id?: string
@@ -269,6 +287,8 @@ export interface Database {
           started_at?: string | null
           completed_at?: string | null
           last_accessed?: string
+          current_stage?: number
+          completed_stages?: Json
         }
         Update: {
           id?: string
@@ -282,6 +302,8 @@ export interface Database {
           started_at?: string | null
           completed_at?: string | null
           last_accessed?: string
+          current_stage?: number
+          completed_stages?: Json
         }
       }
       homework_assignments: {
