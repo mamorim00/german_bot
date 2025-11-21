@@ -21,6 +21,7 @@ export default function LessonsPage() {
       <LessonDetail
         lessonId={selectedLesson}
         onClose={() => setSelectedLesson(null)}
+        onOpenLesson={(lessonId) => setSelectedLesson(lessonId)}
       />
     );
   }

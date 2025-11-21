@@ -10,7 +10,6 @@ import {
   Award,
   Sparkles,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface ReflectionStageProps {
   lessonTitle: string;
@@ -22,6 +21,7 @@ interface ReflectionStageProps {
   badges?: string[];
   nextLessonId?: string;
   onFinish: () => void;
+  onNextLesson?: (lessonId: string) => void;
 }
 
 export const ReflectionStage: React.FC<ReflectionStageProps> = ({
@@ -34,8 +34,8 @@ export const ReflectionStage: React.FC<ReflectionStageProps> = ({
   badges = [],
   nextLessonId,
   onFinish,
+  onNextLesson,
 }) => {
-  const navigate = useNavigate();
   const [showConfetti, setShowConfetti] = useState(false);
   const [animateXP, setAnimateXP] = useState(0);
 
@@ -239,9 +239,9 @@ export const ReflectionStage: React.FC<ReflectionStageProps> = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-        {nextLessonId && (
+        {nextLessonId && onNextLesson && (
           <button
-            onClick={() => navigate(`/lessons/${nextLessonId}`)}
+            onClick={() => onNextLesson(nextLessonId)}
             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2"
           >
             Next Lesson

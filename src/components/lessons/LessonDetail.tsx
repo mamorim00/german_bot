@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   ArrowLeft,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
   Film,
@@ -10,7 +9,6 @@ import {
   Zap,
   Sparkles,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useLearning } from '../../contexts/LearningContext';
 import { ScenarioIntro } from './ScenarioIntro';
 import { GuidedConversation } from './GuidedConversation';
@@ -21,12 +19,12 @@ import { ReflectionStage } from './ReflectionStage';
 interface LessonDetailProps {
   lessonId: string;
   onClose: () => void;
+  onOpenLesson?: (lessonId: string) => void;
 }
 
 type Stage = 1 | 2 | 3 | 4 | 5;
 
-export default function LessonDetail({ lessonId, onClose }: LessonDetailProps) {
-  const navigate = useNavigate();
+export default function LessonDetail({ lessonId, onClose, onOpenLesson }: LessonDetailProps) {
   const { lessons, userLessonProgress, startLesson, completeLesson } = useLearning();
   const [currentStage, setCurrentStage] = useState<Stage>(1);
   const [completedStages, setCompletedStages] = useState<Set<number>>(new Set());
@@ -175,6 +173,18 @@ export default function LessonDetail({ lessonId, onClose }: LessonDetailProps) {
     const finalScore = (completedStages.size / 5) * 70 + (challengeScore / 100) * 30;
     completeLesson(lessonId, finalScore);
     onClose();
+  };
+
+  const handleNextLesson = (nextLessonId: string) => {
+    // Calculate final score and complete current lesson
+    const finalScore = (completedStages.size / 5) * 70 + (challengeScore / 100) * 30;
+    completeLesson(lessonId, finalScore);
+    // Open next lesson if callback provided
+    if (onOpenLesson) {
+      onOpenLesson(nextLessonId);
+    } else {
+      onClose();
+    }
   };
 
   const canGoToStage = (stage: Stage): boolean => {
@@ -379,6 +389,7 @@ export default function LessonDetail({ lessonId, onClose }: LessonDetailProps) {
               badges={challengeScore >= 90 ? ['Conversation Master'] : []}
               nextLessonId={findNextLesson()}
               onFinish={handleLessonFinish}
+              onNextLesson={handleNextLesson}
             />
           )}
         </div>
