@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Volume2, Zap, Trophy, MessageCircle } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { Send, Volume2, Zap, Trophy } from 'lucide-react';
 import { useLearning } from '../../contexts/LearningContext';
 
 interface Message {
@@ -24,8 +23,7 @@ export const ChallengeStage: React.FC<ChallengeStageProps> = ({
   vocabularyList,
   onComplete,
 }) => {
-  const { user } = useAuth();
-  const { getAdaptiveDifficultyPrompt } = useLearning();
+  const { getAdaptiveDifficultyPrompt, userLevel } = useLearning();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +33,6 @@ export const ChallengeStage: React.FC<ChallengeStageProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const MIN_MESSAGES = 3; // Minimum messages to complete challenge
-  const MAX_MESSAGES = 10; // Maximum messages before auto-complete
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,7 +80,7 @@ export const ChallengeStage: React.FC<ChallengeStageProps> = ({
           conversationHistory: messages,
           challengeMode: true,
           challengeContext: challengeDescription,
-          userLevel: user?.current_level || 'A1',
+          userLevel: userLevel || 'A1',
           adaptivePrompt: getAdaptiveDifficultyPrompt(),
           vocabularyList: vocabularyList,
         }),

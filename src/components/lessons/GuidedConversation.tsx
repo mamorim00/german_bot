@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Volume2, Lightbulb, CheckCircle, MessageCircle } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { useLearning } from '../../contexts/LearningContext';
 
 interface ConversationStep {
@@ -30,8 +29,7 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
   vocabularyList,
   onComplete,
 }) => {
-  const { user } = useAuth();
-  const { getAdaptiveDifficultyPrompt } = useLearning();
+  const { getAdaptiveDifficultyPrompt, userLevel } = useLearning();
   const [currentStep, setCurrentStep] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -89,7 +87,7 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
           conversationHistory: messages,
           guidedMode: true,
           currentStep: currentStepData,
-          userLevel: user?.current_level || 'A1',
+          userLevel: userLevel || 'A1',
           adaptivePrompt: getAdaptiveDifficultyPrompt(),
           vocabularyList: vocabularyList,
         }),

@@ -16,6 +16,26 @@ import LessonChat from './LessonChat';
 import { ChallengeStage } from './ChallengeStage';
 import { ReflectionStage } from './ReflectionStage';
 
+interface KeyPhrase {
+  german: string;
+  english: string;
+  pronunciation?: string;
+}
+
+interface DialogueLine {
+  speaker: string;
+  german: string;
+  english: string;
+}
+
+interface ConversationStep {
+  id: number;
+  aiMessage: string;
+  prompt: string;
+  hints?: string[];
+  expectedPhrases?: string[];
+}
+
 interface LessonDetailProps {
   lessonId: string;
   onClose: () => void;
@@ -68,30 +88,30 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
   const conversationPrompts = Array.isArray(lesson.conversation_prompts)
     ? lesson.conversation_prompts
     : [];
-  const grammarTopics = Array.isArray(lesson.grammar_topics) ? lesson.grammar_topics : [];
-  const objectives = Array.isArray(lesson.objectives) ? lesson.objectives : [];
+  const grammarTopics: string[] = Array.isArray(lesson.grammar_topics) ? lesson.grammar_topics as unknown as string[] : [];
 
   // Prepare data for new components
-  const scenarioContext =
-    lesson.scenario_context ||
+  const scenarioContext: string =
+    (typeof lesson.scenario_context === 'string' ? lesson.scenario_context : null) ||
     `You're learning about ${lesson.theme_id.replace(/-/g, ' ')}. Get ready to have real conversations!`;
 
-  const keyPhrases =
-    lesson.key_phrases ||
+  const keyPhrases: KeyPhrase[] =
+    (Array.isArray(lesson.key_phrases) ? lesson.key_phrases as unknown as KeyPhrase[] : null) ||
     vocabularyList.slice(0, 5).map((word: any) => ({
       german: word.german,
       english: word.english,
       pronunciation: word.pronunciation,
     }));
 
-  const exampleDialogue = lesson.example_dialogue || [
+  const exampleDialogue: DialogueLine[] =
+    (Array.isArray(lesson.example_dialogue) ? lesson.example_dialogue as unknown as DialogueLine[] : null) || [
     { speaker: 'AI', german: 'Guten Tag!', english: 'Good day!' },
     { speaker: 'You', german: 'Hallo! Wie geht es dir?', english: 'Hello! How are you?' },
     { speaker: 'AI', german: 'Mir geht es gut, danke!', english: "I'm doing well, thanks!" },
   ];
 
-  const conversationScripts =
-    lesson.conversation_scripts ||
+  const conversationScripts: ConversationStep[] =
+    (Array.isArray(lesson.conversation_scripts) ? lesson.conversation_scripts as unknown as ConversationStep[] : null) ||
     conversationPrompts.slice(0, 3).map((prompt: any, idx: number) => ({
       id: idx + 1,
       aiMessage: `Let's practice! ${prompt}`,
@@ -100,8 +120,8 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
       expectedPhrases: [],
     }));
 
-  const challengeScenario =
-    lesson.challenge_scenario ||
+  const challengeScenario: string =
+    (typeof lesson.challenge_scenario === 'string' ? lesson.challenge_scenario : null) ||
     `Surprise! The person responds in an unexpected way. Show how you'd handle this situation naturally!`;
 
   const challengeDescription =
