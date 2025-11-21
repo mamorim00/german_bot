@@ -7,12 +7,21 @@ import FeedbackPanel from './components/FeedbackPanel';
 import TipsPanel from './components/TipsPanel';
 import AuthModal from './components/auth/AuthModal';
 import UserProfile from './components/auth/UserProfile';
+import LandingPage from './components/LandingPage';
+import Navigation from './components/Navigation';
+import VocabularyPage from './components/vocabulary/VocabularyPage';
+import ProgressPage from './components/progress/ProgressPage';
 import { useAuth } from './contexts/AuthContext';
+import { useProgress } from './contexts/ProgressContext';
+import { useVocabulary } from './contexts/VocabularyContext';
 import { Theme, Message, Correction, CharacterMood, Tip } from './types/index';
-import { ArrowLeft, Sparkles, LogIn } from 'lucide-react';
+import { ArrowLeft, Sparkles, LogIn, TrendingUp } from 'lucide-react';
 
 function App() {
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const { saveConversation, updateThemeProgress, getTotalXP } = useProgress();
+  const { dueWords } = useVocabulary();
+  const [currentPage, setCurrentPage] = useState<'practice' | 'vocabulary' | 'progress' | 'achievements'>('practice');
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [corrections, setCorrections] = useState<Correction[]>([]);
@@ -23,6 +32,7 @@ function App() {
   const [tips, setTips] = useState<Tip[]>([]);
   const [positiveReinforcement, setPositiveReinforcement] = useState<string>('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [conversationStartTime, setConversationStartTime] = useState<number>(Date.now());
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const conversationHistoryRef = useRef<Array<{ role: string; content: string }>>([]);
 
@@ -64,6 +74,7 @@ function App() {
     setPositiveReinforcement('');
     conversationHistoryRef.current = [];
     setCharacterMood('happy');
+    setConversationStartTime(Date.now());
   };
 
   const handleTranscription = async (text: string) => {
@@ -160,13 +171,42 @@ function App() {
     });
   };
 
-  const resetConversation = () => {
+  const resetConversation = async () => {
+    // Save conversation stats if user is authenticated and had messages
+    if (isAuthenticated && selectedTheme && messages.length > 0) {
+      const userMessages = messages.filter(m => m.role === 'user');
+      const correctMessages = userMessages.length - corrections.filter(c => c.explanation).length;
+      const accuracy = userMessages.length > 0 ? (correctMessages / userMessages.length) * 100 : 0;
+      const durationSeconds = Math.floor((Date.now() - conversationStartTime) / 1000);
+      const xpEarned = Math.max(10, Math.floor(userMessages.length * 5 + (accuracy / 10)));
+
+      try {
+        await saveConversation({
+          themeId: selectedTheme.id,
+          messages: messages.map(m => ({ role: m.role, content: m.content })),
+          corrections: corrections.map(c => ({ text: c.text, type: c.type })),
+          durationSeconds,
+          accuracyScore: accuracy,
+          xpEarned,
+        });
+
+        await updateThemeProgress(selectedTheme.id, {
+          messagesCount: userMessages.length,
+          correctCount: correctMessages,
+          timeSeconds: durationSeconds,
+        });
+      } catch (error) {
+        console.error('Error saving conversation:', error);
+      }
+    }
+
     setSelectedTheme(null);
     setMessages([]);
     setCorrections([]);
     setTips([]);
     setPositiveReinforcement('');
     setCharacterMood('happy');
+    setCurrentPage('practice');
     conversationHistoryRef.current = [];
     if (audioRef.current) {
       audioRef.current.pause();
@@ -185,25 +225,65 @@ function App() {
     );
   }
 
+  // Show landing page if not authenticated
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
+
+  // Render authenticated dashboard with navigation
   if (!selectedTheme) {
     return (
-      <div className="min-h-screen bg-warm-bg py-12">
-        {/* Auth button in top right */}
-        <div className="absolute top-4 right-4">
-          {isAuthenticated ? (
-            <UserProfile />
-          ) : (
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-duolingo-green text-white rounded-lg hover:bg-green-600 transition-colors font-semibold"
-            >
-              <LogIn className="w-5 h-5" />
-              Sign In
-            </button>
-          )}
+      <div className="min-h-screen bg-warm-bg flex flex-col">
+        {/* Header with user info */}
+        <div className="bg-white shadow-sm p-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">🇩🇪</span>
+              <span className="text-2xl font-display font-bold text-gray-800">
+                German Learning AI
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              {getTotalXP() > 0 && (
+                <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-duolingo-green" />
+                  <span className="font-bold text-gray-800">{getTotalXP()} XP</span>
+                </div>
+              )}
+              {dueWords.length > 0 && (
+                <div className="bg-duolingo-yellow text-white px-3 py-1 rounded-full text-sm font-bold">
+                  {dueWords.length} words due
+                </div>
+              )}
+              <UserProfile />
+            </div>
+          </div>
         </div>
 
-        <ThemeSelector onSelectTheme={handleThemeSelect} />
+        {/* Navigation */}
+        <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+
+        {/* Page Content */}
+        <div className="flex-1 py-6">
+          {currentPage === 'practice' && (
+            <ThemeSelector onSelectTheme={handleThemeSelect} />
+          )}
+          {currentPage === 'vocabulary' && <VocabularyPage />}
+          {currentPage === 'progress' && <ProgressPage />}
+          {currentPage === 'achievements' && (
+            <div className="max-w-6xl mx-auto p-6 text-center">
+              <div className="card py-12">
+                <p className="text-2xl mb-4">🏆</p>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Achievements Coming Soon!
+                </h2>
+                <p className="text-gray-600">
+                  We're working on an exciting achievements system to celebrate your progress.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Auth Modal */}
         <AuthModal
