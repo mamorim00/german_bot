@@ -5,10 +5,14 @@ import VoiceRecorder from './components/VoiceRecorder';
 import ConversationView from './components/ConversationView';
 import FeedbackPanel from './components/FeedbackPanel';
 import TipsPanel from './components/TipsPanel';
+import AuthModal from './components/auth/AuthModal';
+import UserProfile from './components/auth/UserProfile';
+import { useAuth } from './contexts/AuthContext';
 import { Theme, Message, Correction, CharacterMood, Tip } from './types/index';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, LogIn } from 'lucide-react';
 
 function App() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [corrections, setCorrections] = useState<Correction[]>([]);
@@ -18,6 +22,7 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [tips, setTips] = useState<Tip[]>([]);
   const [positiveReinforcement, setPositiveReinforcement] = useState<string>('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const conversationHistoryRef = useRef<Array<{ role: string; content: string }>>([]);
 
@@ -168,10 +173,43 @@ function App() {
     }
   };
 
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-warm-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-duolingo-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!selectedTheme) {
     return (
       <div className="min-h-screen bg-warm-bg py-12">
+        {/* Auth button in top right */}
+        <div className="absolute top-4 right-4">
+          {isAuthenticated ? (
+            <UserProfile />
+          ) : (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-duolingo-green text-white rounded-lg hover:bg-green-600 transition-colors font-semibold"
+            >
+              <LogIn className="w-5 h-5" />
+              Sign In
+            </button>
+          )}
+        </div>
+
         <ThemeSelector onSelectTheme={handleThemeSelect} />
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+        />
       </div>
     );
   }
@@ -196,9 +234,26 @@ function App() {
             </h2>
           </div>
 
-          <div className="w-32"></div> {/* Spacer for centering */}
+          {/* User profile or sign in button */}
+          {isAuthenticated ? (
+            <UserProfile />
+          ) : (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="flex items-center gap-2 px-3 py-2 text-duolingo-blue hover:bg-blue-50 rounded-lg transition-colors font-semibold"
+            >
+              <LogIn className="w-5 h-5" />
+              Sign In
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
