@@ -34,6 +34,7 @@ interface LearningContextType {
   // Methods
   startLesson: (lessonId: string) => Promise<void>;
   completeLesson: (lessonId: string, score: number) => Promise<void>;
+  updateLessonProgress: (lessonId: string, currentStage: number, completedStages: number[]) => Promise<void>;
   updateGrammarMastery: (topic: string, correct: boolean) => Promise<void>;
   submitHomework: (homeworkId: string, submissionData: any) => Promise<void>;
   setComplexityPreference: (preference: 'simple' | 'moderate' | 'complex' | 'auto') => Promise<void>;
@@ -216,6 +217,56 @@ export function LearningProvider({ children }: { children: ReactNode }) {
       await refreshLearningData();
     } catch (error) {
       console.error('Error starting lesson:', error);
+    }
+  };
+
+  const updateLessonProgress = async (lessonId: string, currentStage: number, completedStages: number[]) => {
+    if (!user) {
+      // Save to localStorage for non-authenticated users
+      const localProgress = JSON.parse(localStorage.getItem('lesson_progress') || '{}');
+      localProgress[lessonId] = {
+        currentStage,
+        completedStages,
+        lastUpdated: new Date().toISOString(),
+      };
+      localStorage.setItem('lesson_progress', JSON.stringify(localProgress));
+      return;
+    }
+
+    try {
+      const progress = userLessonProgress.find(p => p.lesson_id === lessonId);
+      if (!progress) {
+        // Create new progress entry
+        const { error } = await supabase
+          .from('user_lesson_progress')
+          .insert({
+            user_id: user.id,
+            lesson_id: lessonId,
+            status: 'in_progress',
+            started_at: new Date().toISOString(),
+            current_stage: currentStage,
+            completed_stages: completedStages,
+            last_accessed: new Date().toISOString(),
+          } as any);
+
+        if (error) throw error;
+      } else {
+        // Update existing progress
+        const { error } = await (supabase
+          .from('user_lesson_progress')
+          .update as any)({
+            current_stage: currentStage,
+            completed_stages: completedStages,
+            last_accessed: new Date().toISOString(),
+          })
+          .eq('id', progress.id);
+
+        if (error) throw error;
+      }
+
+      await refreshLearningData();
+    } catch (error) {
+      console.error('Error updating lesson progress:', error);
     }
   };
 
@@ -404,6 +455,7 @@ export function LearningProvider({ children }: { children: ReactNode }) {
     loading,
     startLesson,
     completeLesson,
+    updateLessonProgress,
     updateGrammarMastery,
     submitHomework,
     setComplexityPreference,

@@ -45,7 +45,7 @@ interface LessonDetailProps {
 type Stage = 1 | 2 | 3 | 4 | 5;
 
 export default function LessonDetail({ lessonId, onClose, onOpenLesson }: LessonDetailProps) {
-  const { lessons, userLessonProgress, startLesson, completeLesson, loading } = useLearning();
+  const { lessons, userLessonProgress, startLesson, completeLesson, updateLessonProgress, loading } = useLearning();
   const [currentStage, setCurrentStage] = useState<Stage>(1);
   const [completedStages, setCompletedStages] = useState<Set<number>>(new Set());
   const [challengeScore, setChallengeScore] = useState(0);
@@ -58,12 +58,20 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
     if (lesson && (!progress || progress.status === 'not_started')) {
       startLesson(lessonId);
     }
-    // Load saved progress if exists
-    if (progress?.current_stage) {
+
+    // Load saved progress - try localStorage first for non-authenticated users
+    const localProgress = JSON.parse(localStorage.getItem('lesson_progress') || '{}');
+    const savedProgress = localProgress[lessonId];
+
+    if (savedProgress) {
+      setCurrentStage(savedProgress.currentStage as Stage);
+      setCompletedStages(new Set(savedProgress.completedStages));
+    } else if (progress?.current_stage) {
+      // Load from database for authenticated users
       setCurrentStage(progress.current_stage as Stage);
-    }
-    if (progress?.completed_stages) {
-      setCompletedStages(new Set(progress.completed_stages as number[]));
+      if (progress?.completed_stages) {
+        setCompletedStages(new Set(progress.completed_stages as number[]));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonId]);
@@ -190,9 +198,13 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
     const stageXP = 50;
     setTotalXP((prev) => prev + stageXP);
 
+    // Save progress after completing stage
+    const nextStage = stage < 5 ? (stage + 1) as Stage : stage;
+    updateLessonProgress(lessonId, nextStage, Array.from(newCompleted));
+
     // Move to next stage if not last
     if (stage < 5) {
-      setCurrentStage((stage + 1) as Stage);
+      setCurrentStage(nextStage);
     }
   };
 

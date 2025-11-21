@@ -17,11 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Text is required' });
     }
 
+    // Use 'alloy' voice which has the best German pronunciation
+    // Other good options: 'onyx' (male, deep), 'fable' (male, warm)
     const mp3 = await openai.audio.speech.create({
-      model: 'tts-1',
-      voice: 'nova', // Warm, friendly female voice
+      model: 'tts-1-hd', // Higher quality model for better pronunciation
+      voice: 'alloy', // Best neutral voice for German pronunciation
       input: text,
-      speed: 0.9, // Slightly slower for language learning
+      speed: 0.85, // Slightly slower for language learning
     });
 
     const buffer = Buffer.from(await mp3.arrayBuffer());

@@ -11,10 +11,114 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { message, theme, conversationHistory } = req.body;
+    const {
+      message,
+      theme,
+      conversationHistory,
+      guidedMode,
+      currentStep,
+      challengeMode,
+      userLevel,
+      adaptivePrompt
+    } = req.body;
 
-    if (!message || !theme) {
-      return res.status(400).json({ error: 'Message and theme are required' });
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Handle new lesson format (guided/challenge mode)
+    if (guidedMode && currentStep) {
+      const systemPrompt = `Du bist ein freundlicher deutscher Sprachlehrer für ${userLevel || 'A1'} Lernende.
+
+AUFGABE: Führe ein geführtes Gespräch zum Thema "${theme}".
+
+AKTUELLER SCHRITT:
+${currentStep.prompt}
+
+${currentStep.expectedPhrases ? `ERWARTETE PHRASEN: ${currentStep.expectedPhrases.join(', ')}` : ''}
+
+${adaptivePrompt || ''}
+
+ANWEISUNGEN:
+1. Antworte natürlich auf Deutsch
+2. Gib konstruktives Feedback wenn der Lernende Fehler macht
+3. Ermutige den Lernenden
+4. Halte die Antworten kurz und fokussiert auf den aktuellen Schritt
+5. Verwende passende Grammatik und Vokabular für ${userLevel || 'A1'} Level
+
+ANTWORT-FORMAT (JSON):
+{
+  "response": "Deine Antwort auf Deutsch",
+  "feedback": "Kurzes Feedback zur Antwort des Lernenden (optional)"
+}`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...(conversationHistory || []).map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        { role: 'user', content: message },
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4-turbo-preview',
+        messages: messages as any,
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+      });
+
+      const responseContent = completion.choices[0].message.content;
+      const parsedResponse = JSON.parse(responseContent || '{}');
+
+      return res.status(200).json(parsedResponse);
+    }
+
+    // Handle challenge mode
+    if (challengeMode) {
+      const systemPrompt = `Du bist ein deutscher Muttersprachler in einer unerwarteten Gesprächssituation.
+
+THEMA: ${theme}
+LEVEL: ${userLevel || 'A1'}
+
+${adaptivePrompt || ''}
+
+ANWEISUNGEN:
+1. Antworte natürlich auf die Situation
+2. Sei authentisch und spontan
+3. Halte das Gespräch interessant mit unerwarteten Wendungen
+4. Verwende passende Grammatik für ${userLevel || 'A1'} Level
+
+ANTWORT-FORMAT (JSON):
+{
+  "response": "Deine natürliche Antwort auf Deutsch"
+}`;
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...(conversationHistory || []).map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        { role: 'user', content: message },
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4-turbo-preview',
+        messages: messages as any,
+        response_format: { type: 'json_object' },
+        temperature: 0.8,
+      });
+
+      const responseContent = completion.choices[0].message.content;
+      const parsedResponse = JSON.parse(responseContent || '{}');
+
+      return res.status(200).json(parsedResponse);
+    }
+
+    // Handle old conversation practice format
+    if (!theme || !theme.character) {
+      return res.status(400).json({ error: 'Theme with character is required for practice mode' });
     }
 
     const systemPrompt = `Du bist ${theme.character.name}, ein/e ${theme.character.occupation}.
