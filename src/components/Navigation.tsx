@@ -1,15 +1,16 @@
-import { MessageCircle, Book, TrendingUp, Trophy } from 'lucide-react';
+import { MessageCircle, Book, TrendingUp, Trophy, BookOpen } from 'lucide-react';
 
 interface NavigationProps {
-  currentPage: 'practice' | 'vocabulary' | 'progress' | 'achievements';
-  onPageChange: (page: 'practice' | 'vocabulary' | 'progress' | 'achievements') => void;
+  currentPage: 'practice' | 'lessons' | 'vocabulary' | 'progress' | 'achievements';
+  onPageChange: (page: 'practice' | 'lessons' | 'vocabulary' | 'progress' | 'achievements') => void;
 }
 
 export default function Navigation({ currentPage, onPageChange }: NavigationProps) {
   const navItems = [
     { id: 'practice' as const, icon: MessageCircle, label: 'Practice', color: 'text-duolingo-blue' },
+    { id: 'lessons' as const, icon: BookOpen, label: 'Lessons', color: 'text-duolingo-green' },
     { id: 'vocabulary' as const, icon: Book, label: 'Vocabulary', color: 'text-duolingo-purple' },
-    { id: 'progress' as const, icon: TrendingUp, label: 'Progress', color: 'text-duolingo-green' },
+    { id: 'progress' as const, icon: TrendingUp, label: 'Progress', color: 'text-green-600' },
     { id: 'achievements' as const, icon: Trophy, label: 'Achievements', color: 'text-duolingo-yellow' },
   ];
 

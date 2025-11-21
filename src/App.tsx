@@ -11,6 +11,8 @@ import LandingPage from './components/LandingPage';
 import Navigation from './components/Navigation';
 import VocabularyPage from './components/vocabulary/VocabularyPage';
 import ProgressPage from './components/progress/ProgressPage';
+import LessonsPage from './components/lessons/LessonsPage';
+import AchievementsPage from './components/achievements/AchievementsPage';
 import { useAuth } from './contexts/AuthContext';
 import { useProgress } from './contexts/ProgressContext';
 import { useVocabulary } from './contexts/VocabularyContext';
@@ -21,7 +23,7 @@ function App() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { saveConversation, updateThemeProgress, getTotalXP } = useProgress();
   const { dueWords } = useVocabulary();
-  const [currentPage, setCurrentPage] = useState<'practice' | 'vocabulary' | 'progress' | 'achievements'>('practice');
+  const [currentPage, setCurrentPage] = useState<'practice' | 'lessons' | 'vocabulary' | 'progress' | 'achievements'>('practice');
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [corrections, setCorrections] = useState<Correction[]>([]);
@@ -268,21 +270,10 @@ function App() {
           {currentPage === 'practice' && (
             <ThemeSelector onSelectTheme={handleThemeSelect} />
           )}
+          {currentPage === 'lessons' && <LessonsPage />}
           {currentPage === 'vocabulary' && <VocabularyPage />}
           {currentPage === 'progress' && <ProgressPage />}
-          {currentPage === 'achievements' && (
-            <div className="max-w-6xl mx-auto p-6 text-center">
-              <div className="card py-12">
-                <p className="text-2xl mb-4">🏆</p>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Achievements Coming Soon!
-                </h2>
-                <p className="text-gray-600">
-                  We're working on an exciting achievements system to celebrate your progress.
-                </p>
-              </div>
-            </div>
-          )}
+          {currentPage === 'achievements' && <AchievementsPage />}
         </div>
 
         {/* Auth Modal */}
