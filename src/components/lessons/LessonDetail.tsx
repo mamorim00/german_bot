@@ -45,7 +45,7 @@ interface LessonDetailProps {
 type Stage = 1 | 2 | 3 | 4 | 5;
 
 export default function LessonDetail({ lessonId, onClose, onOpenLesson }: LessonDetailProps) {
-  const { lessons, userLessonProgress, startLesson, completeLesson } = useLearning();
+  const { lessons, userLessonProgress, startLesson, completeLesson, loading } = useLearning();
   const [currentStage, setCurrentStage] = useState<Stage>(1);
   const [completedStages, setCompletedStages] = useState<Set<number>>(new Set());
   const [challengeScore, setChallengeScore] = useState(0);
@@ -65,7 +65,20 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
     if (progress?.completed_stages) {
       setCompletedStages(new Set(progress.completed_stages as number[]));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonId]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading lesson...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!lesson) {
     return (
@@ -83,7 +96,7 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
     );
   }
 
-  // Parse lesson data
+  // Parse lesson data - ONLY AFTER we know lesson exists
   const vocabularyList = Array.isArray(lesson.vocabulary_list) ? lesson.vocabulary_list : [];
   const conversationPrompts = Array.isArray(lesson.conversation_prompts)
     ? lesson.conversation_prompts
