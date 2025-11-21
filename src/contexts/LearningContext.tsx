@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Database } from '../types/database';
+import { gamifiedLessons } from '../data/gamifiedLessons';
 
 type LessonPlan = Database['public']['Tables']['lesson_plans']['Row'];
 type UserLessonProgress = Database['public']['Tables']['user_lesson_progress']['Row'];
@@ -93,15 +94,25 @@ export function LearningProvider({ children }: { children: ReactNode }) {
         setComplexityPref(userDataTyped.complexity_preference as any || 'auto');
       }
 
-      // Fetch all lessons
+      // Fetch all lessons - use gamifiedLessons as primary source
+      // This ensures lessons are always available even if database is empty
       const { data: lessonsData, error: lessonsError } = await supabase
         .from('lesson_plans')
         .select('*')
         .order('level', { ascending: true })
         .order('lesson_number', { ascending: true });
 
-      if (!lessonsError) {
-        setLessons(lessonsData || []);
+      // Use database lessons if available, otherwise use local gamifiedLessons
+      if (!lessonsError && lessonsData && lessonsData.length > 0) {
+        setLessons(lessonsData);
+      } else {
+        // Use local lessons data with proper IDs
+        const localLessons = gamifiedLessons.map((lesson) => ({
+          ...lesson,
+          id: `lesson-${lesson.level}-${lesson.lesson_number}`,
+          created_at: new Date().toISOString(),
+        })) as any[];
+        setLessons(localLessons);
       }
 
       // Fetch user lesson progress
