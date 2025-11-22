@@ -21,13 +21,17 @@ export const speakGerman = async (
   }
 ): Promise<void> => {
   try {
+    console.log('🔊 speakGerman called with text:', text.substring(0, 50) + '...');
+
     // Stop any currently playing audio
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
+      currentAudio = null;
     }
 
     // Call the speak API to get German audio
+    console.log('📡 Fetching audio from /api/speak...');
     const response = await fetch('/api/speak', {
       method: 'POST',
       headers: {
@@ -36,13 +40,24 @@ export const speakGerman = async (
       body: JSON.stringify({ text }),
     });
 
+    console.log('📡 Response status:', response.status, response.statusText);
+
     if (!response.ok) {
-      throw new Error('Failed to generate speech');
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      console.error('❌ API error:', errorData);
+      throw new Error(`Failed to generate speech: ${errorData.error || response.statusText}`);
     }
 
     // Create audio from the response
     const audioBlob = await response.blob();
+    console.log('📦 Audio blob size:', audioBlob.size, 'bytes, type:', audioBlob.type);
+
+    if (audioBlob.size === 0) {
+      throw new Error('Received empty audio blob');
+    }
+
     const audioUrl = URL.createObjectURL(audioBlob);
+    console.log('🎵 Created audio URL:', audioUrl);
 
     const audio = new Audio(audioUrl);
     currentAudio = audio;
@@ -50,41 +65,54 @@ export const speakGerman = async (
     // Apply volume
     audio.volume = options?.volume ?? 1.0;
 
-    // Note: Speed is already applied in the API call, not here
-    // API uses the speed parameter when generating the audio
+    // Setup event handlers BEFORE playing
+    audio.addEventListener('loadeddata', () => {
+      console.log('✅ Audio loaded successfully');
+    });
 
-    // Setup event handlers
-    if (options?.onStart) {
-      audio.addEventListener('play', options.onStart);
-    }
+    audio.addEventListener('play', () => {
+      console.log('▶️ Audio playing');
+      options?.onStart?.();
+    });
 
-    if (options?.onEnd) {
-      audio.addEventListener('ended', () => {
-        options.onEnd?.();
-        URL.revokeObjectURL(audioUrl);
-        currentAudio = null;
-      });
-    } else {
-      audio.addEventListener('ended', () => {
-        URL.revokeObjectURL(audioUrl);
-        currentAudio = null;
-      });
-    }
-
-    audio.onerror = (e) => {
-      console.error('Audio playback error:', e);
+    audio.addEventListener('ended', () => {
+      console.log('⏹️ Audio ended');
+      options?.onEnd?.();
       URL.revokeObjectURL(audioUrl);
       currentAudio = null;
-    };
+    });
+
+    audio.addEventListener('error', (e) => {
+      console.error('❌ Audio playback error:', e);
+      console.error('Audio error details:', {
+        error: audio.error,
+        networkState: audio.networkState,
+        readyState: audio.readyState,
+      });
+      URL.revokeObjectURL(audioUrl);
+      currentAudio = null;
+      // Fallback to browser TTS on audio element error
+      fallbackToSpeechSynthesis(text, options);
+    });
 
     // Play the audio
-    await audio.play().catch(err => {
-      console.error('Failed to play audio:', err);
-      throw err;
-    });
+    console.log('🎬 Attempting to play audio...');
+    try {
+      await audio.play();
+      console.log('✅ Audio play() succeeded');
+    } catch (playError) {
+      console.error('❌ Audio play() failed:', playError);
+      // Try to provide more context about the error
+      if (playError instanceof Error) {
+        console.error('Error name:', playError.name);
+        console.error('Error message:', playError.message);
+      }
+      throw playError;
+    }
   } catch (error) {
-    console.error('Error speaking German text:', error);
+    console.error('❌ Error in speakGerman:', error);
     // Fallback to browser speech synthesis if API fails
+    console.log('🔄 Falling back to browser speech synthesis...');
     fallbackToSpeechSynthesis(text, options);
   }
 };
