@@ -3,12 +3,19 @@ import { Send, Volume2, Lightbulb, CheckCircle, MessageCircle } from 'lucide-rea
 import { useLearning } from '../../contexts/LearningContext';
 import { speakGerman } from '../../utils/germanSpeech';
 
+interface AnswerOption {
+  text: string;
+  isCorrect: boolean;
+  feedback: string;
+}
+
 interface ConversationStep {
   id: number;
   aiMessage: string;
   prompt: string;
   hints?: string[];
   expectedPhrases?: string[];
+  options?: AnswerOption[];
 }
 
 interface Message {
@@ -154,6 +161,54 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
     );
   };
 
+  const handleOptionSelect = async (option: AnswerOption) => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    // Add user message
+    setMessages((prev) => [...prev, { role: 'user', content: option.text }]);
+
+    // Add AI feedback response
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: option.feedback,
+        },
+      ]);
+
+      // If correct, mark step as complete and move to next
+      if (option.isCorrect && !completedSteps.has(currentStep)) {
+        const newCompleted = new Set(completedSteps);
+        newCompleted.add(currentStep);
+        setCompletedSteps(newCompleted);
+
+        // Move to next step after a brief delay
+        if (currentStep < conversationSteps.length - 1) {
+          setTimeout(() => {
+            setCurrentStep(currentStep + 1);
+            setShowHints(false);
+            // Add next step's AI message
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: 'assistant',
+                content: conversationSteps[currentStep + 1].aiMessage,
+              },
+            ]);
+            setIsLoading(false);
+          }, 1500);
+        } else {
+          setIsLoading(false);
+        }
+      } else {
+        setIsLoading(false);
+      }
+    }, 500);
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-0">
       {/* Progress Header */}
@@ -270,28 +325,50 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
           </div>
         )}
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="p-3 sm:p-6 pt-0 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Antworten Sie auf Deutsch..."
-              className="flex-1 px-4 py-3 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              disabled={isLoading || allStepsCompleted}
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim() || allStepsCompleted}
-              className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
-            >
-              <Send className="w-4 h-4" />
-              <span>Send</span>
-            </button>
+        {/* Multiple Choice Options or Input Form */}
+        {currentStepData.options && currentStepData.options.length > 0 ? (
+          <div className="p-3 sm:p-6 pt-0 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 text-center">
+              Choose your response:
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
+              {currentStepData.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleOptionSelect(option)}
+                  disabled={isLoading || allStepsCompleted}
+                  className="w-full px-4 py-4 sm:py-5 text-left bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-98 shadow-sm hover:shadow-md"
+                >
+                  <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white leading-relaxed">
+                    {option.text}
+                  </p>
+                </button>
+              ))}
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-3 sm:p-6 pt-0 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Antworten Sie auf Deutsch..."
+                className="flex-1 px-4 py-3 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                disabled={isLoading || allStepsCompleted}
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim() || allStepsCompleted}
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
+              >
+                <Send className="w-4 h-4" />
+                <span>Send</span>
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Completion Button */}

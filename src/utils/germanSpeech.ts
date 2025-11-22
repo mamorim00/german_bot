@@ -50,8 +50,8 @@ export const speakGerman = async (
     // Apply volume
     audio.volume = options?.volume ?? 1.0;
 
-    // Apply playback rate (speed)
-    audio.playbackRate = options?.rate ?? 1.0;
+    // Note: Speed is already applied in the API call, not here
+    // API uses the speed parameter when generating the audio
 
     // Setup event handlers
     if (options?.onStart) {
@@ -62,15 +62,26 @@ export const speakGerman = async (
       audio.addEventListener('ended', () => {
         options.onEnd?.();
         URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
       });
     } else {
       audio.addEventListener('ended', () => {
         URL.revokeObjectURL(audioUrl);
+        currentAudio = null;
       });
     }
 
+    audio.onerror = (e) => {
+      console.error('Audio playback error:', e);
+      URL.revokeObjectURL(audioUrl);
+      currentAudio = null;
+    };
+
     // Play the audio
-    await audio.play();
+    await audio.play().catch(err => {
+      console.error('Failed to play audio:', err);
+      throw err;
+    });
   } catch (error) {
     console.error('Error speaking German text:', error);
     // Fallback to browser speech synthesis if API fails

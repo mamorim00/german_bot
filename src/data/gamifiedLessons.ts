@@ -29,21 +29,39 @@ export const gamifiedLessons = [
         aiMessage: 'Hallo! Ich bin dein Sprachpartner. Wie heißt du?',
         prompt: 'Greet me and tell me your name',
         hints: ['Use "Hallo" to greet', 'Use "Ich heiße..." to say your name'],
-        expectedPhrases: ['hallo', 'ich heiße']
+        expectedPhrases: ['hallo', 'ich heiße'],
+        options: [
+          { text: 'Hallo! Ich heiße Anna.', isCorrect: true, feedback: '✨ Perfect! Great greeting and introduction!' },
+          { text: 'Guten Tag! Mein Name ist Tom.', isCorrect: true, feedback: '🎯 Excellent! Very formal and polite!' },
+          { text: 'Wie geht es dir?', isCorrect: false, feedback: '❌ Not quite - this asks "How are you?" Try greeting and introducing yourself first!' },
+          { text: 'Hi! Ich bin Maria.', isCorrect: true, feedback: '👍 Good! A casual way to introduce yourself!' }
+        ]
       },
       {
         id: 2,
         aiMessage: 'Sehr gut! Und woher kommst du?',
         prompt: 'Tell me where you\'re from (use: Ich komme aus...)',
         hints: ['Say your country in German', 'Use "Ich komme aus..."'],
-        expectedPhrases: ['ich komme', 'aus']
+        expectedPhrases: ['ich komme', 'aus'],
+        options: [
+          { text: 'Ich komme aus Deutschland.', isCorrect: true, feedback: '🌟 Wunderbar! Perfect sentence structure!' },
+          { text: 'Ich wohne in Berlin.', isCorrect: false, feedback: '❌ This says where you live, not where you\'re from. Try "Ich komme aus..."' },
+          { text: 'Ich bin aus Amerika.', isCorrect: true, feedback: '✅ Great! Another correct way to say it!' },
+          { text: 'Aus Spanien.', isCorrect: true, feedback: '👌 Good! Short and clear!' }
+        ]
       },
       {
         id: 3,
         aiMessage: 'Wunderbar! Jetzt sag auf Wiedersehen.',
         prompt: 'Say goodbye in a friendly way',
         hints: ['You can use "Tschüss" or "Auf Wiedersehen"'],
-        expectedPhrases: ['tschüss', 'auf wiedersehen', 'bye']
+        expectedPhrases: ['tschüss', 'auf wiedersehen', 'bye'],
+        options: [
+          { text: 'Auf Wiedersehen! Bis bald!', isCorrect: true, feedback: '🎉 Perfect! Very polite and friendly!' },
+          { text: 'Guten Morgen!', isCorrect: false, feedback: '❌ This is a morning greeting, not a goodbye. Try "Tschüss"!' },
+          { text: 'Tschüss! Bis später!', isCorrect: true, feedback: '👋 Great! A nice casual goodbye!' },
+          { text: 'Bis morgen!', isCorrect: true, feedback: '⭐ Excellent! "See you tomorrow!"' }
+        ]
       }
     ],
     challenge_scenario: 'Überraschung! Your new friend just said "Bis bald!" instead of goodbye. How do you respond naturally? (Hint: "Bis bald" means "See you soon!")',
@@ -130,21 +148,39 @@ export const gamifiedLessons = [
         aiMessage: 'Guten Morgen! Willkommen im Café. Was möchten Sie heute?',
         prompt: 'Order a coffee or tea (use: Ich möchte...)',
         hints: ['Use "Ich möchte einen Kaffee" or "Ich möchte einen Tee"', 'Don\'t forget "bitte"!'],
-        expectedPhrases: ['ich möchte', 'kaffee', 'tee']
+        expectedPhrases: ['ich möchte', 'kaffee', 'tee'],
+        options: [
+          { text: 'Ich möchte einen Kaffee, bitte.', isCorrect: true, feedback: '☕ Perfect! Very polite ordering!' },
+          { text: 'Einen Cappuccino, bitte.', isCorrect: true, feedback: '✨ Great! Direct and clear!' },
+          { text: 'Ich bin hungrig.', isCorrect: false, feedback: '❌ This says you\'re hungry, but doesn\'t order anything. Try "Ich möchte..."' },
+          { text: 'Ich möchte einen Tee, bitte.', isCorrect: true, feedback: '🍵 Excellent! Perfect sentence!' }
+        ]
       },
       {
         id: 2,
         aiMessage: 'Sehr gut! Möchten Sie auch etwas zu essen?',
         prompt: 'Order a pastry (Croissant, Brötchen, or Kuchen)',
         hints: ['Try "Und ein Croissant, bitte"', 'Use "und" to add to your order'],
-        expectedPhrases: ['croissant', 'brötchen', 'kuchen']
+        expectedPhrases: ['croissant', 'brötchen', 'kuchen'],
+        options: [
+          { text: 'Ja, und ein Croissant, bitte.', isCorrect: true, feedback: '🥐 Wunderbar! Perfect addition to your order!' },
+          { text: 'Nein, danke.', isCorrect: true, feedback: '👍 Good! Polite way to decline!' },
+          { text: 'Ein Brötchen mit Butter, bitte.', isCorrect: true, feedback: '🍞 Excellent! Very specific and clear!' },
+          { text: 'Wie viel kostet das?', isCorrect: false, feedback: '❌ This asks the price, but doesn\'t order food. Try ordering first!' }
+        ]
       },
       {
         id: 3,
         aiMessage: 'Perfekt! Möchten Sie Ihren Kaffee mit Milch und Zucker?',
         prompt: 'Say how you want your coffee (mit Milch, ohne Zucker, etc.)',
         hints: ['mit = with, ohne = without', '"Ja, bitte" or "Nein, danke" also work!'],
-        expectedPhrases: ['mit', 'ohne', 'ja', 'nein']
+        expectedPhrases: ['mit', 'ohne', 'ja', 'nein'],
+        options: [
+          { text: 'Mit Milch, aber ohne Zucker, bitte.', isCorrect: true, feedback: '🎯 Perfect! Very specific preference!' },
+          { text: 'Ja, bitte. Mit Milch.', isCorrect: true, feedback: '✅ Great! Clear and polite!' },
+          { text: 'Auf Wiedersehen!', isCorrect: false, feedback: '❌ This is goodbye - but the barista is still asking about your coffee!' },
+          { text: 'Ohne Milch, bitte.', isCorrect: true, feedback: '☕ Excellent! Clear preference!' }
+        ]
       }
     ],
     challenge_scenario: 'Plot twist! The barista just asked "Zum Mitnehmen oder hier trinken?" (To go or drink here?). How do you respond? Try saying "Hier trinken" (drink here) or "Zum Mitnehmen" (to go)!',

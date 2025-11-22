@@ -266,7 +266,7 @@ function App() {
         <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
 
         {/* Page Content */}
-        <div className="flex-1 py-6">
+        <div className="flex-1 py-6 pb-24 md:pb-6">
           {currentPage === 'practice' && (
             <ThemeSelector onSelectTheme={handleThemeSelect} />
           )}
