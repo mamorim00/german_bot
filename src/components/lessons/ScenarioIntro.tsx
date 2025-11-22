@@ -32,11 +32,23 @@ export const ScenarioIntro: React.FC<ScenarioIntroProps> = ({
   const [completedPhrases, setCompletedPhrases] = useState<Set<number>>(new Set());
 
   const speakText = async (text: string, index: number) => {
+    console.log('🔊 ScenarioIntro: Attempting to play audio for:', text.substring(0, 30) + '...');
     setPlayingAudio(index);
-    await speakGerman(text, {
-      rate: 0.8,
-      onEnd: () => setPlayingAudio(null),
-    });
+    try {
+      await speakGerman(text, {
+        rate: 0.8,
+        onEnd: () => {
+          console.log('⏹️ Audio ended for index:', index);
+          setPlayingAudio(null);
+        },
+        onStart: () => {
+          console.log('▶️ Audio started for index:', index);
+        },
+      });
+    } catch (error) {
+      console.error('❌ Audio playback failed in ScenarioIntro:', error);
+      setPlayingAudio(null);
+    }
   };
 
   const togglePhraseCompletion = (index: number) => {

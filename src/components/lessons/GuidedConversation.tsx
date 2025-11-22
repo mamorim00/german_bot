@@ -46,10 +46,19 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const currentStepData = conversationSteps[currentStep];
+  const currentStepData = conversationSteps[currentStep] || conversationSteps[0];
   const allStepsCompleted = completedSteps.size === conversationSteps.length;
+  const hasOptions = currentStepData?.options && currentStepData.options.length > 0;
 
   useEffect(() => {
+    // Debug logging
+    console.log('🎯 GuidedConversation - Current Step:', currentStep);
+    console.log('📝 Current Step Data:', currentStepData);
+    console.log('✅ Has Options:', currentStepData?.options?.length || 0);
+    console.log('📊 Completed Steps:', Array.from(completedSteps));
+    console.log('🎨 Will Show Options UI:', hasOptions);
+    console.log('🏁 All Steps Completed:', allStepsCompleted);
+
     // Initialize with first AI message
     if (messages.length === 0 && currentStepData) {
       setMessages([
@@ -59,7 +68,7 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
         },
       ]);
     }
-  }, []);
+  }, [currentStep, currentStepData]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -326,13 +335,13 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
         )}
 
         {/* Multiple Choice Options or Input Form */}
-        {currentStepData.options && currentStepData.options.length > 0 ? (
+        {hasOptions ? (
           <div className="p-3 sm:p-6 pt-0 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 text-center">
               Choose your response:
             </p>
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
-              {currentStepData.options.map((option, index) => (
+              {currentStepData.options?.map((option, index) => (
                 <button
                   key={index}
                   onClick={() => handleOptionSelect(option)}
@@ -375,7 +384,10 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
       {allStepsCompleted && (
         <div className="flex justify-center px-4 sm:px-0 animate-fade-in">
           <button
-            onClick={onComplete}
+            onClick={() => {
+              console.log('✅ Completing Stage 2 - Moving to Free Talk');
+              onComplete();
+            }}
             className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
           >
             <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -383,6 +395,16 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
           </button>
         </div>
       )}
+
+      {/* Debug Info - Shows always for now */}
+      <div className="mt-4 p-4 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg text-xs">
+        <p className="font-bold mb-2">Debug Info:</p>
+        <p>Current Step: {currentStep + 1}/{conversationSteps.length}</p>
+        <p>Completed: {completedSteps.size}/{conversationSteps.length}</p>
+        <p>Has Options: {hasOptions ? 'Yes' : 'No'}</p>
+        <p>All Complete: {allStepsCompleted ? 'Yes' : 'No'}</p>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Check console for audio logs</p>
+      </div>
     </div>
   );
 };
