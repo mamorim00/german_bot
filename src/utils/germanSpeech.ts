@@ -1,112 +1,12 @@
 /**
  * Utility for German text-to-speech with proper German accent
+ * Uses OpenAI TTS API for high-quality native German pronunciation
  */
 
-let germanVoice: SpeechSynthesisVoice | null = null;
-let voicesLoaded = false;
+let currentAudio: HTMLAudioElement | null = null;
 
 /**
- * Get the best available German voice from the browser
- */
-export const getGermanVoice = (): Promise<SpeechSynthesisVoice | null> => {
-  return new Promise((resolve) => {
-    if (!('speechSynthesis' in window)) {
-      resolve(null);
-      return;
-    }
-
-    // If we already have a voice cached, return it
-    if (voicesLoaded && germanVoice) {
-      resolve(germanVoice);
-      return;
-    }
-
-    const selectBestGermanVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-
-      if (voices.length === 0) {
-        resolve(null);
-        return;
-      }
-
-      // Filter for German voices
-      const germanVoices = voices.filter(voice =>
-        voice.lang.startsWith('de') || voice.lang.startsWith('de-DE')
-      );
-
-      if (germanVoices.length === 0) {
-        console.warn('No German voices available, speech may have incorrect accent');
-        resolve(null);
-        return;
-      }
-
-      // Prioritize voices in this order:
-      // 1. German voices that are marked as local/default
-      // 2. German voices with "Google" in the name (usually good quality)
-      // 3. Any German voice
-
-      const localGermanVoice = germanVoices.find(v => v.localService && v.default);
-      if (localGermanVoice) {
-        germanVoice = localGermanVoice;
-        voicesLoaded = true;
-        console.log('Selected German voice:', germanVoice.name);
-        resolve(germanVoice);
-        return;
-      }
-
-      const googleGermanVoice = germanVoices.find(v =>
-        v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('deutsch')
-      );
-      if (googleGermanVoice) {
-        germanVoice = googleGermanVoice;
-        voicesLoaded = true;
-        console.log('Selected German voice:', germanVoice.name);
-        resolve(germanVoice);
-        return;
-      }
-
-      // Prefer female voices as they tend to be clearer for learning
-      const femaleGermanVoice = germanVoices.find(v =>
-        v.name.toLowerCase().includes('female') ||
-        v.name.toLowerCase().includes('anna') ||
-        v.name.toLowerCase().includes('petra')
-      );
-      if (femaleGermanVoice) {
-        germanVoice = femaleGermanVoice;
-        voicesLoaded = true;
-        console.log('Selected German voice:', germanVoice.name);
-        resolve(germanVoice);
-        return;
-      }
-
-      // Fall back to first German voice
-      germanVoice = germanVoices[0];
-      voicesLoaded = true;
-      console.log('Selected German voice:', germanVoice.name);
-      resolve(germanVoice);
-    };
-
-    // Voices might not be loaded immediately
-    if (window.speechSynthesis.getVoices().length > 0) {
-      selectBestGermanVoice();
-    } else {
-      // Wait for voices to load
-      window.speechSynthesis.onvoiceschanged = () => {
-        selectBestGermanVoice();
-      };
-
-      // Timeout after 2 seconds
-      setTimeout(() => {
-        if (!voicesLoaded) {
-          selectBestGermanVoice();
-        }
-      }, 2000);
-    }
-  });
-};
-
-/**
- * Speak German text with proper German accent
+ * Speak German text with native German pronunciation using OpenAI TTS
  * @param text - The German text to speak
  * @param options - Optional speech synthesis options
  */
@@ -120,29 +20,87 @@ export const speakGerman = async (
     onStart?: () => void;
   }
 ): Promise<void> => {
+  try {
+    // Stop any currently playing audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
+    // Call the speak API to get German audio
+    const response = await fetch('/api/speak', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate speech');
+    }
+
+    // Create audio from the response
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    const audio = new Audio(audioUrl);
+    currentAudio = audio;
+
+    // Apply volume
+    audio.volume = options?.volume ?? 1.0;
+
+    // Apply playback rate (speed)
+    audio.playbackRate = options?.rate ?? 1.0;
+
+    // Setup event handlers
+    if (options?.onStart) {
+      audio.addEventListener('play', options.onStart);
+    }
+
+    if (options?.onEnd) {
+      audio.addEventListener('ended', () => {
+        options.onEnd?.();
+        URL.revokeObjectURL(audioUrl);
+      });
+    } else {
+      audio.addEventListener('ended', () => {
+        URL.revokeObjectURL(audioUrl);
+      });
+    }
+
+    // Play the audio
+    await audio.play();
+  } catch (error) {
+    console.error('Error speaking German text:', error);
+    // Fallback to browser speech synthesis if API fails
+    fallbackToSpeechSynthesis(text, options);
+  }
+};
+
+/**
+ * Fallback to browser's speech synthesis if API fails
+ */
+const fallbackToSpeechSynthesis = (
+  text: string,
+  options?: {
+    rate?: number;
+    pitch?: number;
+    volume?: number;
+    onEnd?: () => void;
+    onStart?: () => void;
+  }
+): void => {
   if (!('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported');
     return;
   }
 
-  // Cancel any ongoing speech
   window.speechSynthesis.cancel();
 
-  // Get the best German voice
-  const voice = await getGermanVoice();
-
   const utterance = new SpeechSynthesisUtterance(text);
-
-  // Set the German voice if available
-  if (voice) {
-    utterance.voice = voice;
-  }
-
-  // Always set the language to German
   utterance.lang = 'de-DE';
-
-  // Apply options
-  utterance.rate = options?.rate ?? 0.85; // Slightly slower for learning
+  utterance.rate = options?.rate ?? 0.85;
   utterance.pitch = options?.pitch ?? 1.0;
   utterance.volume = options?.volume ?? 1.0;
 
@@ -161,6 +119,14 @@ export const speakGerman = async (
  * Stop any ongoing speech
  */
 export const stopSpeaking = (): void => {
+  // Stop API audio
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+
+  // Stop browser speech synthesis
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }

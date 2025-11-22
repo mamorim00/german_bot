@@ -155,23 +155,24 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-0">
       {/* Progress Header */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-xl border border-indigo-200 dark:border-indigo-800 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <span className="text-2xl">🎯</span>
-            Guided Practice
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 sm:p-6 rounded-xl border border-indigo-200 dark:border-indigo-800 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <span className="text-xl sm:text-2xl">🎯</span>
+            <span className="hidden sm:inline">Guided Practice</span>
+            <span className="sm:hidden">Practice</span>
           </h2>
-          <div className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-            Step {currentStep + 1} of {conversationSteps.length}
+          <div className="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
+            Step {currentStep + 1}/{conversationSteps.length}
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-3">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-3 mb-3">
           <div
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 sm:h-3 rounded-full transition-all duration-500"
             style={{
               width: `${((currentStep + 1) / conversationSteps.length) * 100}%`,
             }}
@@ -179,48 +180,47 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
         </div>
 
         {/* Current Prompt */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Your task:</p>
-          <p className="text-gray-900 dark:text-white font-medium">
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Your task:</p>
+          <p className="text-sm sm:text-base text-gray-900 dark:text-white font-medium">
             {currentStepData.prompt}
           </p>
         </div>
       </div>
 
       {/* Chat Messages */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="h-96 overflow-y-auto p-6 space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 flex flex-col" style={{ height: 'calc(100vh - 400px)', minHeight: '400px', maxHeight: '600px' }}>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex gap-3 ${
+              className={`flex gap-2 sm:gap-3 ${
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
               <div
-                className={`max-w-md ${
+                className={`max-w-[85%] sm:max-w-md ${
                   message.role === 'user'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                } p-4 rounded-2xl shadow-sm`}
+                } p-3 sm:p-4 rounded-2xl shadow-sm`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  {message.role === 'assistant' && (
-                    <>
-                      <MessageCircle className="w-4 h-4 opacity-70" />
-                      <button
-                        onClick={() => speakText(message.content)}
-                        className="opacity-70 hover:opacity-100 transition-opacity"
-                      >
-                        <Volume2 className="w-4 h-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
-                <p className="leading-relaxed">{message.content}</p>
+                {message.role === 'assistant' && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageCircle className="w-4 h-4 opacity-70" />
+                    <button
+                      onClick={() => speakText(message.content)}
+                      className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                      aria-label="Play audio"
+                    >
+                      <Volume2 className="w-5 h-5 opacity-70 hover:opacity-100" />
+                    </button>
+                  </div>
+                )}
+                <p className="text-sm sm:text-base leading-relaxed">{message.content}</p>
                 {message.feedback && (
-                  <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
-                    <p className="text-sm opacity-90">💡 {message.feedback}</p>
+                  <div className="mt-2 pt-2 border-t border-white/20">
+                    <p className="text-xs sm:text-sm opacity-90">💡 {message.feedback}</p>
                   </div>
                 )}
               </div>
@@ -248,20 +248,20 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
 
         {/* Hints Section */}
         {currentStepData.hints && currentStepData.hints.length > 0 && (
-          <div className="px-6 pb-4">
+          <div className="px-3 sm:px-6 pb-3 sm:pb-4">
             <button
               onClick={() => setShowHints(!showHints)}
-              className="flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              className="flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors p-2 -ml-2"
             >
-              <Lightbulb className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {showHints ? 'Hide hints' : 'Need a hint?'}
+              <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base font-medium">
+                {showHints ? 'Hide hints' : 'Need a hint? 💡'}
               </span>
             </button>
             {showHints && (
-              <div className="mt-2 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg space-y-1">
+              <div className="mt-2 bg-amber-50 dark:bg-amber-900/20 p-3 sm:p-4 rounded-lg space-y-2 animate-fade-in">
                 {currentStepData.hints.map((hint, index) => (
-                  <p key={index} className="text-sm text-amber-800 dark:text-amber-300">
+                  <p key={index} className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
                     • {hint}
                   </p>
                 ))}
@@ -271,23 +271,24 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
         )}
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="p-6 pt-0">
-          <div className="flex gap-3">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-6 pt-0 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your response in German..."
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              placeholder="Antworten Sie auf Deutsch..."
+              className="flex-1 px-4 py-3 sm:py-3 text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               disabled={isLoading || allStepsCompleted}
+              autoComplete="off"
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim() || allStepsCompleted}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
             >
               <Send className="w-4 h-4" />
-              Send
+              <span>Send</span>
             </button>
           </div>
         </form>
@@ -295,13 +296,13 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
 
       {/* Completion Button */}
       {allStepsCompleted && (
-        <div className="flex justify-center">
+        <div className="flex justify-center px-4 sm:px-0 animate-fade-in">
           <button
             onClick={onComplete}
-            className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2"
+            className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
           >
-            <CheckCircle className="w-6 h-6" />
-            Continue to Free Practice
+            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Continue to Free Practice →</span>
           </button>
         </div>
       )}
