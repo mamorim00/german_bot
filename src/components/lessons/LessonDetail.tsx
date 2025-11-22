@@ -159,14 +159,14 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
     },
     {
       number: 2,
-      name: 'Guided Practice',
+      name: 'Multiple Choice',
       icon: Target,
       color: 'from-indigo-500 to-purple-500',
       bgColor: 'from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20',
     },
     {
       number: 3,
-      name: 'Free Conversation',
+      name: 'Free Talk',
       icon: MessageCircle,
       color: 'from-purple-500 to-pink-500',
       bgColor: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20',
@@ -387,10 +387,10 @@ export default function LessonDetail({ lessonId, onClose, onOpenLesson }: Lesson
               <div className="mb-6 text-center">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center gap-2">
                   <MessageCircle className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-                  Free Conversation Practice
+                  Free Talk
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Now it's your turn! Have a natural conversation using what you've learned.
+                  Now practice naturally! Have a real conversation using what you've learned.
                 </p>
               </div>
               <LessonChat

@@ -216,8 +216,8 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <span className="text-xl sm:text-2xl">🎯</span>
-            <span className="hidden sm:inline">Guided Practice</span>
-            <span className="sm:hidden">Practice</span>
+            <span className="hidden sm:inline">Multiple Choice Practice</span>
+            <span className="sm:hidden">Quiz</span>
           </h2>
           <div className="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
             Step {currentStep + 1}/{conversationSteps.length}
@@ -379,7 +379,7 @@ export const GuidedConversation: React.FC<GuidedConversationProps> = ({
             className="w-full sm:w-auto px-6 sm:px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
           >
             <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span>Continue to Free Practice →</span>
+            <span>Continue to Free Talk →</span>
           </button>
         </div>
       )}

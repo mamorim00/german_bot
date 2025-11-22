@@ -98,14 +98,28 @@ export const speakGerman = async (
     // Play the audio
     console.log('🎬 Attempting to play audio...');
     try {
-      await audio.play();
-      console.log('✅ Audio play() succeeded');
+      // For iOS Safari, we need to play immediately from user interaction
+      const playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+        await playPromise;
+        console.log('✅ Audio play() succeeded');
+      }
     } catch (playError) {
       console.error('❌ Audio play() failed:', playError);
-      // Try to provide more context about the error
+
+      // Handle specific autoplay errors (common on iOS Safari)
       if (playError instanceof Error) {
         console.error('Error name:', playError.name);
         console.error('Error message:', playError.message);
+
+        // NotAllowedError or AbortError = autoplay blocked by browser
+        if (playError.name === 'NotAllowedError' || playError.name === 'AbortError') {
+          console.warn('🚫 Autoplay blocked by browser - falling back to speech synthesis');
+          console.warn('Tip: User needs to interact with page first to enable audio');
+          fallbackToSpeechSynthesis(text, options);
+          return; // Don't throw, just use fallback
+        }
       }
       throw playError;
     }
